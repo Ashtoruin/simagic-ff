@@ -239,6 +239,32 @@ static void pidff_set(struct pidff_usage *usage, u16 value)
 	pr_debug("calculated from %d to %d\n", value, usage->value[0]);
 }
 
+static void simagic_hid_hw_request_shifted(struct hid_device *hid,
+		    struct hid_report *report, enum hid_class_request reqtype) 
+{
+	__u8 *cmd;
+	__u8 *buf;
+	int ret;
+
+	buf = hid_alloc_report_buf(report, GFP_KERNEL); // allocates +7 bytes
+	
+	if (!buf)
+		return;
+	buf[0] = report->id;
+	hid_output_report(report, buf+1);
+	
+	hid_dbg(hid, "Sending report: ");
+	printk(KERN_CONT "%02x", 0x01);
+	for (size_t i = 0; i < sizeof(buf); i++) {
+		printk(KERN_CONT "%02x", buf[i]);
+	}
+	// ReportID for Effects is always 0x01
+	hid_hw_raw_request(hid, 0x01, buf, hid_report_len(report) + 2, HID_OUTPUT_REPORT,
+				reqtype);
+				
+	kfree(buf);
+}
+
 static void pidff_set_signed(struct pidff_usage *usage, s16 value)
 {
 	if (usage->field->logical_minimum < 0)
@@ -279,7 +305,7 @@ static void pidff_set_envelope_report(struct pidff_device *pidff,
 		envelope->attack_level,
 		pidff->set_envelope[PID_ATTACK_LEVEL].value[0]);
 
-	hid_hw_request(pidff->hid, pidff->reports[PID_SET_ENVELOPE],
+	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_SET_ENVELOPE],
 			HID_REQ_SET_REPORT);
 }
 
@@ -306,7 +332,7 @@ static void pidff_set_constant_force_report(struct pidff_device *pidff,
 	pidff_set_signed(&pidff->set_constant[PID_MAGNITUDE],
 			 effect->u.constant.level);
 
-	hid_hw_request(pidff->hid, pidff->reports[PID_SET_CONSTANT],
+	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_SET_CONSTANT],
 			HID_REQ_SET_REPORT);
 }
 
@@ -342,7 +368,7 @@ static void pidff_set_effect_report(struct pidff_device *pidff,
 				pidff->effect_direction);
 	//pidff->set_effect[PID_START_DELAY].value[0] = effect->replay.delay;
 
-	hid_hw_request(pidff->hid, pidff->reports[PID_SET_EFFECT],
+	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_SET_EFFECT],
 			HID_REQ_SET_REPORT);
 }
 
@@ -374,7 +400,7 @@ static void pidff_set_periodic_report(struct pidff_device *pidff,
 	pidff_set(&pidff->set_periodic[PID_PHASE], effect->u.periodic.phase);
 	pidff->set_periodic[PID_PERIOD].value[0] = effect->u.periodic.period;
 
-	hid_hw_request(pidff->hid, pidff->reports[PID_SET_PERIODIC],
+	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_SET_PERIODIC],
 			HID_REQ_SET_REPORT);
 
 }
@@ -416,7 +442,7 @@ static void pidff_set_condition_report(struct pidff_device *pidff,
 			  effect->u.condition[i].left_saturation);
 		pidff_set(&pidff->set_condition[PID_DEAD_BAND],
 			  effect->u.condition[i].deadband);
-		hid_hw_request(pidff->hid, pidff->reports[PID_SET_CONDITION],
+		simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_SET_CONDITION],
 				HID_REQ_SET_REPORT);
 	}
 }
@@ -457,7 +483,7 @@ static void pidff_set_ramp_force_report(struct pidff_device *pidff,
 			 effect->u.ramp.start_level);
 	pidff_set_signed(&pidff->set_ramp[PID_RAMP_END],
 			 effect->u.ramp.end_level);
-	hid_hw_request(pidff->hid, pidff->reports[PID_SET_RAMP],
+	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_SET_RAMP],
 			HID_REQ_SET_REPORT);
 }
 
@@ -534,7 +560,7 @@ static void pidff_playback_pid(struct pidff_device *pidff, int pid_id, int n)
 		pidff->effect_operation[PID_LOOP_COUNT].value[0] = n;
 	}
 
-	hid_hw_request(pidff->hid, pidff->reports[PID_EFFECT_OPERATION],
+	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_EFFECT_OPERATION],
 			HID_REQ_SET_REPORT);
 }
 
@@ -633,7 +659,7 @@ static int pidff_playback(struct input_dev *dev, int effect_id, int value)
 static void pidff_erase_pid(struct pidff_device *pidff, int pid_id)
 {
 	pidff->block_free[PID_EFFECT_BLOCK_INDEX].value[0] = pid_id;
-	hid_hw_request(pidff->hid, pidff->reports[PID_BLOCK_FREE],
+	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_BLOCK_FREE],
 			HID_REQ_SET_REPORT);
 }
 
@@ -850,7 +876,7 @@ static void pidff_autocenter(struct pidff_device *pidff, u16 magnitude)
 	pidff->set_effect[PID_DIRECTION_ENABLE].value[0] = 1;
 	//pidff->set_effect[PID_START_DELAY].value[0] = 0;
 
-	hid_hw_request(pidff->hid, pidff->reports[PID_SET_EFFECT],
+	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_SET_EFFECT],
 			HID_REQ_SET_REPORT);
 }
 
