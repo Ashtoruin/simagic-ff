@@ -242,7 +242,6 @@ static void pidff_set(struct pidff_usage *usage, u16 value)
 static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 		    struct hid_report *report, enum hid_class_request reqtype) 
 {
-	__u8 *cmd;
 	__u8 *buf;
 	int ret;
 
@@ -251,7 +250,7 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 	if (!buf)
 		return;
 	buf[0] = report->id;
-	hid_output_report(report, buf+1);
+	hid_output_report(report, buf+2);
 	
 	hid_dbg(hid, "Sending report: ");
 	printk(KERN_CONT "%02x", 0x01);
@@ -259,7 +258,7 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 		printk(KERN_CONT "%02x", buf[i]);
 	}
 	// ReportID for Effects is always 0x01
-	hid_hw_raw_request(hid, 0x01, buf, hid_report_len(report) + 2, HID_OUTPUT_REPORT,
+	hid_hw_raw_request(hid, 0x01, buf, sizeof(buf), report->type,
 				reqtype);
 				
 	kfree(buf);
@@ -508,7 +507,7 @@ static int pidff_request_effect_upload(struct pidff_device *pidff, int efnum)
 	int j;
 
 	pidff->create_new_effect_type->value[0] = efnum;
-	hid_hw_request(pidff->hid, pidff->reports[PID_CREATE_NEW_EFFECT],
+	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_CREATE_NEW_EFFECT],
 			HID_REQ_SET_REPORT);
 	hid_dbg(pidff->hid, "create_new_effect sent, type: %d\n", efnum);
 
@@ -518,7 +517,7 @@ static int pidff_request_effect_upload(struct pidff_device *pidff, int efnum)
 
 	for (j = 0; j < 60; j++) {
 		hid_dbg(pidff->hid, "pid_block_load requested\n");
-		hid_hw_request(pidff->hid, pidff->reports[PID_BLOCK_LOAD],
+		simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_BLOCK_LOAD],
 				HID_REQ_GET_REPORT);
 		hid_hw_wait(pidff->hid);
 		if (pidff->block_load_status->value[0] ==
@@ -850,7 +849,7 @@ static void pidff_set_gain(struct input_dev *dev, u16 gain)
 	struct pidff_device *pidff = dev->ff->private;
 
 	pidff_set(&pidff->device_gain[PID_DEVICE_GAIN_FIELD], gain);
-	hid_hw_request(pidff->hid, pidff->reports[PID_DEVICE_GAIN],
+	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_DEVICE_GAIN],
 			HID_REQ_SET_REPORT);
 }
 
@@ -1290,18 +1289,18 @@ static void pidff_reset(struct pidff_device *pidff)
 
 	pidff->device_control->value[0] = pidff->control_id[PID_RESET];
 	/* We reset twice as sometimes hid_wait_io isn't waiting long enough */
-	hid_hw_request(hid, pidff->reports[PID_DEVICE_CONTROL], HID_REQ_SET_REPORT);
+	simagic_hid_hw_request_shifted(hid, pidff->reports[PID_DEVICE_CONTROL], HID_REQ_SET_REPORT);
 	hid_hw_wait(hid);
-	hid_hw_request(hid, pidff->reports[PID_DEVICE_CONTROL], HID_REQ_SET_REPORT);
+	simagic_hid_hw_request_shifted(hid, pidff->reports[PID_DEVICE_CONTROL], HID_REQ_SET_REPORT);
 	hid_hw_wait(hid);
 
 	pidff->device_control->value[0] =
 		pidff->control_id[PID_ENABLE_ACTUATORS];
-	hid_hw_request(hid, pidff->reports[PID_DEVICE_CONTROL], HID_REQ_SET_REPORT);
+	simagic_hid_hw_request_shifted(hid, pidff->reports[PID_DEVICE_CONTROL], HID_REQ_SET_REPORT);
 	hid_hw_wait(hid);
 
 	/* pool report is sometimes messed up, refetch it */
-	hid_hw_request(hid, pidff->reports[PID_POOL], HID_REQ_GET_REPORT);
+	simagic_hid_hw_request_shifted(hid, pidff->reports[PID_POOL], HID_REQ_GET_REPORT);
 	hid_hw_wait(hid);
 
 	if (pidff->pool[PID_SIMULTANEOUS_MAX].value) {
@@ -1313,7 +1312,7 @@ static void pidff_reset(struct pidff_device *pidff)
 				break;
 			}
 			hid_dbg(pidff->hid, "pid_pool requested again\n");
-			hid_hw_request(hid, pidff->reports[PID_POOL],
+			simagic_hid_hw_request_shifted(hid, pidff->reports[PID_POOL],
 					  HID_REQ_GET_REPORT);
 			hid_hw_wait(hid);
 		}
@@ -1401,7 +1400,7 @@ int hid_pidff_init_simagic(struct hid_device *hid)
 
 	if (test_bit(FF_GAIN, dev->ffbit)) {
 		pidff_set(&pidff->device_gain[PID_DEVICE_GAIN_FIELD], 0xffff);
-		hid_hw_request(hid, pidff->reports[PID_DEVICE_GAIN],
+		simagic_hid_hw_request_shifted(hid, pidff->reports[PID_DEVICE_GAIN],
 				     HID_REQ_SET_REPORT);
 	}
 
