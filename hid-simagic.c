@@ -707,9 +707,6 @@ static __u8 simagic_pid_rdesc[] = {
 static u8 *simagic_report_fixup(struct hid_device *hdev, __u8 *rdesc,
 					unsigned int *rsize)
 {
-	__u8 *new_rdesc;
-	size_t new_size = *rsize + sizeof(simagic_pid_rdesc);
-
 	// If descriptor is smol
 	if (*rsize < sizeof(simagic_pid_rdesc)) {
 		dev_info(&hdev->dev,
