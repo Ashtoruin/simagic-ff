@@ -517,7 +517,7 @@ static int pidff_request_effect_upload(struct pidff_device *pidff, int efnum)
 
 	for (j = 0; j < 60; j++) {
 		hid_dbg(pidff->hid, "pid_block_load requested\n");
-		simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_BLOCK_LOAD],
+		hid_hw_request(pidff->hid, pidff->reports[PID_BLOCK_LOAD],
 				HID_REQ_GET_REPORT);
 		hid_hw_wait(pidff->hid);
 		if (pidff->block_load_status->value[0] ==
@@ -1300,7 +1300,7 @@ static void pidff_reset(struct pidff_device *pidff)
 	hid_hw_wait(hid);
 
 	/* pool report is sometimes messed up, refetch it */
-	simagic_hid_hw_request_shifted(hid, pidff->reports[PID_POOL], HID_REQ_GET_REPORT);
+	hid_hw_request(hid, pidff->reports[PID_POOL], HID_REQ_GET_REPORT);
 	hid_hw_wait(hid);
 
 	if (pidff->pool[PID_SIMULTANEOUS_MAX].value) {
@@ -1312,7 +1312,7 @@ static void pidff_reset(struct pidff_device *pidff)
 				break;
 			}
 			hid_dbg(pidff->hid, "pid_pool requested again\n");
-			simagic_hid_hw_request_shifted(hid, pidff->reports[PID_POOL],
+			hid_hw_request(hid, pidff->reports[PID_POOL],
 					  HID_REQ_GET_REPORT);
 			hid_hw_wait(hid);
 		}
