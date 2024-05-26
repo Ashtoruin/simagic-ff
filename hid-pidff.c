@@ -242,13 +242,17 @@ static void pidff_set(struct pidff_usage *usage, u16 value)
 static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 		    struct hid_report *report, enum hid_class_request reqtype) 
 {
+	printk(KERN_DEBUG "%s", __func__);
 	__u8 *buf;
 	int ret;
 
 	buf = hid_alloc_report_buf(report, GFP_KERNEL); // allocates +7 bytes
 	
-	if (!buf)
+	if (!buf) {
+		hid_dbg(hid, "Memory error");
 		return;
+	}
+
 	buf[0] = 0x01;
 	buf[1] = report->id;
 	hid_output_report(report, buf+2);
@@ -393,6 +397,7 @@ static int pidff_needs_set_effect(struct ff_effect *effect,
 static void pidff_set_periodic_report(struct pidff_device *pidff,
 				      struct ff_effect *effect)
 {
+	printk(KERN_DEBUG "%s", __func__);
 	pidff->set_periodic[PID_EFFECT_BLOCK_INDEX].value[0] =
 		pidff->block_load[PID_EFFECT_BLOCK_INDEX].value[0];
 	pidff_set_signed(&pidff->set_periodic[PID_MAGNITUDE],
@@ -427,6 +432,7 @@ static void pidff_set_condition_report(struct pidff_device *pidff,
 {
 	int i;
 
+	printk(KERN_DEBUG "%s", __func__);
 	pidff->set_condition[PID_EFFECT_BLOCK_INDEX].value[0] =
 		pidff->block_load[PID_EFFECT_BLOCK_INDEX].value[0];
 
@@ -479,6 +485,7 @@ static int pidff_needs_set_condition(struct ff_effect *effect,
 static void pidff_set_ramp_force_report(struct pidff_device *pidff,
 					struct ff_effect *effect)
 {
+	printk(KERN_DEBUG "%s", __func__);
 	pidff->set_ramp[PID_EFFECT_BLOCK_INDEX].value[0] =
 		pidff->block_load[PID_EFFECT_BLOCK_INDEX].value[0];
 	pidff_set_signed(&pidff->set_ramp[PID_RAMP_START],
@@ -508,6 +515,7 @@ static int pidff_needs_set_ramp(struct ff_effect *effect, struct ff_effect *old)
 static int pidff_request_effect_upload(struct pidff_device *pidff, int efnum)
 {
 	int j;
+	printk(KERN_DEBUG "%s", __func__);
 
 	pidff->create_new_effect_type->value[0] = efnum;
 	hid_hw_request(pidff->hid, pidff->reports[PID_CREATE_NEW_EFFECT],
@@ -547,6 +555,7 @@ static int pidff_request_effect_upload(struct pidff_device *pidff, int efnum)
  */
 static void pidff_playback_pid(struct pidff_device *pidff, int pid_id, int n)
 {
+	printk(KERN_DEBUG "%s", __func__);
 	pidff->effect_operation[PID_EFFECT_BLOCK_INDEX].value[0] = pid_id;
 
 	if (n == 0) {
@@ -568,6 +577,7 @@ static void pidff_playback_pid(struct pidff_device *pidff, int pid_id, int n)
 
 static void pidff_force_update_effect(struct pidff_device *pidff, struct ff_effect *effect)
 {
+	printk(KERN_DEBUG "%s", __func__);
 	int type_id;
 	pidff->block_load[PID_EFFECT_BLOCK_INDEX].value[0] = pidff->pid_id[effect->id];
 	switch (effect->type) {
@@ -660,6 +670,7 @@ static int pidff_playback(struct input_dev *dev, int effect_id, int value)
  */
 static void pidff_erase_pid(struct pidff_device *pidff, int pid_id)
 {
+	printk(KERN_DEBUG "%s", __func__);
 	pidff->block_free[PID_EFFECT_BLOCK_INDEX].value[0] = pid_id;
 	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_BLOCK_FREE],
 			HID_REQ_SET_REPORT);
@@ -858,6 +869,7 @@ static void pidff_set_gain(struct input_dev *dev, u16 gain)
 
 static void pidff_autocenter(struct pidff_device *pidff, u16 magnitude)
 {
+	printk(KERN_DEBUG "%s", __func__);
 	struct hid_field *field =
 		pidff->block_load[PID_EFFECT_BLOCK_INDEX].field;
 
