@@ -254,8 +254,8 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 		return;
 	}
 
-	buf[0] = report->id;
-	hid_output_report(report, buf+1);
+	//buf[0] = report->id;
+	hid_output_report(report, buf);
 	
 	hid_dbg(hid, "Sending report: ");
 	for (size_t i = 0; i < sizeof(buf); i++) {
