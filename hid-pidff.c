@@ -243,10 +243,18 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 		    struct hid_report *report, enum hid_class_request reqtype) 
 {
 	hid_dbg(hid, "%s", __func__);
-	
+	size_t i;
+	s32 *value = report->field[0]->value;
+	for (i = 0; i < report->field[0]->report_size; i++) {
+		value[i+1] = value[i];
+	}
+	value[0] = report->id;
 	report->id = 0x01;
+	hid_dbg(hid, "Sending report 0x01: ");
+	for (i = 0; i < report->field[0]->report_size+1; i++) {
+	 	hid_dbg(hid, "%02x", value[i]);
+	}
 	hid_hw_request(hid, report, reqtype);
-
 	// __u8 *buf;
 
 	// buf = hid_alloc_report_buf(report, GFP_KERNEL); // allocates +7 bytes
