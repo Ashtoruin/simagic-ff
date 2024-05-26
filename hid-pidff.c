@@ -245,13 +245,13 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 	hid_dbg(hid, "%s", __func__);
 	size_t i;
 	s32 *value = report->field[0]->value;
-	for (i = 0; i < report->field[0]->report_size; i++) {
+	for (i = 0; i < report->field[0]->report_size-1; i++) {
 		value[i+1] = value[i];
 	}
 	value[0] = report->id;
 	report->id = 0x01;
 	hid_dbg(hid, "Sending report 0x01: ");
-	for (i = 0; i < report->field[0]->report_size+1; i++) {
+	for (i = 0; i < report->field[0]->report_size; i++) {
 	 	hid_dbg(hid, "%02x", value[i]);
 	}
 	hid_hw_request(hid, report, reqtype);
