@@ -1422,9 +1422,9 @@ int hid_pidff_init_simagic(struct hid_device *hid)
 				     HID_REQ_SET_REPORT);
 	}
 
-	error = pidff_check_autocenter(pidff, dev);
-	if (error)
-		goto fail;
+	// error = pidff_check_autocenter(pidff, dev);
+	// if (error)
+	// 	goto fail;
 
 	max_effects =
 	    pidff->block_load[PID_EFFECT_BLOCK_INDEX].field->logical_maximum -
@@ -1460,7 +1460,7 @@ int hid_pidff_init_simagic(struct hid_device *hid)
 	ff->upload = pidff_upload_effect;
 	ff->erase = pidff_erase_effect;
 	ff->set_gain = pidff_set_gain;
-	ff->set_autocenter = pidff_set_autocenter;
+	//ff->set_autocenter = pidff_set_autocenter;
 	ff->playback = pidff_playback;
 
 	hid_info(dev, "Force feedback for Simagic wheelbase\n");
