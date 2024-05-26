@@ -1464,7 +1464,7 @@ int hid_pidff_init_simagic(struct hid_device *hid)
 	ff->set_autocenter = pidff_set_autocenter;
 	ff->playback = pidff_playback;
 
-	hid_info(dev, "Force feedback for Simagic wheel\n");
+	hid_info(dev, "Force feedback for Simagic wheelbase\n");
 
 	hid_device_io_stop(hid);
 
