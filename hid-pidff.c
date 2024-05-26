@@ -849,7 +849,7 @@ static void pidff_set_gain(struct input_dev *dev, u16 gain)
 	struct pidff_device *pidff = dev->ff->private;
 
 	pidff_set(&pidff->device_gain[PID_DEVICE_GAIN_FIELD], gain);
-	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_DEVICE_GAIN],
+	hid_hw_request(pidff->hid, pidff->reports[PID_DEVICE_GAIN],
 			HID_REQ_SET_REPORT);
 }
 
@@ -1289,14 +1289,14 @@ static void pidff_reset(struct pidff_device *pidff)
 
 	pidff->device_control->value[0] = pidff->control_id[PID_RESET];
 	/* We reset twice as sometimes hid_wait_io isn't waiting long enough */
-	simagic_hid_hw_request_shifted(hid, pidff->reports[PID_DEVICE_CONTROL], HID_REQ_SET_REPORT);
+	hid_hw_request(hid, pidff->reports[PID_DEVICE_CONTROL], HID_REQ_SET_REPORT);
 	hid_hw_wait(hid);
-	simagic_hid_hw_request_shifted(hid, pidff->reports[PID_DEVICE_CONTROL], HID_REQ_SET_REPORT);
+	hid_hw_request(hid, pidff->reports[PID_DEVICE_CONTROL], HID_REQ_SET_REPORT);
 	hid_hw_wait(hid);
 
 	pidff->device_control->value[0] =
 		pidff->control_id[PID_ENABLE_ACTUATORS];
-	simagic_hid_hw_request_shifted(hid, pidff->reports[PID_DEVICE_CONTROL], HID_REQ_SET_REPORT);
+	hid_hw_request(hid, pidff->reports[PID_DEVICE_CONTROL], HID_REQ_SET_REPORT);
 	hid_hw_wait(hid);
 
 	/* pool report is sometimes messed up, refetch it */
@@ -1400,7 +1400,7 @@ int hid_pidff_init_simagic(struct hid_device *hid)
 
 	if (test_bit(FF_GAIN, dev->ffbit)) {
 		pidff_set(&pidff->device_gain[PID_DEVICE_GAIN_FIELD], 0xffff);
-		simagic_hid_hw_request_shifted(hid, pidff->reports[PID_DEVICE_GAIN],
+		hid_hw_request(hid, pidff->reports[PID_DEVICE_GAIN],
 				     HID_REQ_SET_REPORT);
 	}
 
