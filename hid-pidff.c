@@ -292,6 +292,7 @@ static void pidff_set_signed(struct pidff_usage *usage, s16 value)
 static void pidff_set_envelope_report(struct pidff_device *pidff,
 				      struct ff_envelope *envelope)
 {
+	printk(KERN_DEBUG "%s", __func__);
 	pidff->set_envelope[PID_EFFECT_BLOCK_INDEX].value[0] =
 	    pidff->block_load[PID_EFFECT_BLOCK_INDEX].value[0];
 
@@ -333,6 +334,7 @@ static int pidff_needs_set_envelope(struct ff_envelope *envelope,
 static void pidff_set_constant_force_report(struct pidff_device *pidff,
 					    struct ff_effect *effect)
 {
+	printk(KERN_DEBUG "%s", __func__);
 	pidff->set_constant[PID_EFFECT_BLOCK_INDEX].value[0] =
 		pidff->block_load[PID_EFFECT_BLOCK_INDEX].value[0];
 	pidff_set_signed(&pidff->set_constant[PID_MAGNITUDE],
@@ -555,7 +557,7 @@ static int pidff_request_effect_upload(struct pidff_device *pidff, int efnum)
  */
 static void pidff_playback_pid(struct pidff_device *pidff, int pid_id, int n)
 {
-	printk(KERN_DEBUG "%s", __func__);
+	printk(KERN_DEBUG "%s, n=%d", __func__, n);
 	pidff->effect_operation[PID_EFFECT_BLOCK_INDEX].value[0] = pid_id;
 
 	if (n == 0) {
@@ -577,7 +579,7 @@ static void pidff_playback_pid(struct pidff_device *pidff, int pid_id, int n)
 
 static void pidff_force_update_effect(struct pidff_device *pidff, struct ff_effect *effect)
 {
-	printk(KERN_DEBUG "%s", __func__);
+	printk(KERN_DEBUG "%s, effect->type is 0x%02x", __func__, effect->type);
 	int type_id;
 	pidff->block_load[PID_EFFECT_BLOCK_INDEX].value[0] = pidff->pid_id[effect->id];
 	switch (effect->type) {
@@ -650,6 +652,8 @@ static void pidff_force_update_effect(struct pidff_device *pidff, struct ff_effe
  */
 static int pidff_playback(struct input_dev *dev, int effect_id, int value)
 {
+	printk(KERN_DEBUG "%s, value is %d", __func__, value);
+
 	struct pidff_device *pidff = dev->ff->private;
 
 	if (value > 0) {
