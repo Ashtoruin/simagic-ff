@@ -245,7 +245,7 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 	hid_dbg(hid, "%s", __func__);
 	size_t i;
 	s32 *value = report->field[0]->value;
-	for (i = 1; i <= report->field[0]->report_size-1; i++) {
+	for (i = report->field[0]->report_size-1; i > 0; i--) {
 		value[i] = value[i-1];
 	}
 	value[0] = report->id;
