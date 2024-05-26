@@ -507,7 +507,7 @@ static int pidff_request_effect_upload(struct pidff_device *pidff, int efnum)
 	int j;
 
 	pidff->create_new_effect_type->value[0] = efnum;
-	simagic_hid_hw_request_shifted(pidff->hid, pidff->reports[PID_CREATE_NEW_EFFECT],
+	hid_hw_request(pidff->hid, pidff->reports[PID_CREATE_NEW_EFFECT],
 			HID_REQ_SET_REPORT);
 	hid_dbg(pidff->hid, "create_new_effect sent, type: %d\n", efnum);
 
