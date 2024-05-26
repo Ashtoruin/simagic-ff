@@ -244,30 +244,31 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 {
 	hid_dbg(hid, "%s", __func__);
 	
-	
-	__u8 *buf;
+	report->id = 0x01;
+	hid_hw_request(hid, report, reqtype);
 
-	buf = hid_alloc_report_buf(report, GFP_KERNEL); // allocates +7 bytes
-	
-	if (!buf) {
-		hid_dbg(hid, "Memory error");
-		return;
-	}
+	// __u8 *buf;
 
-	//buf[0] = report->id;
-	hid_output_report(report, buf);
+	// buf = hid_alloc_report_buf(report, GFP_KERNEL); // allocates +7 bytes
 	
-	hid_dbg(hid, "Sending report: ");
-	for (size_t i = 0; i < sizeof(buf); i++) {
-		hid_dbg(hid, "%02x", buf[i]);
-	}
-	hid_dbg(hid, "Report end\n");
+	// if (!buf) {
+	// 	hid_dbg(hid, "Memory error");
+	// 	return;
+	// }
 
-	// ReportID for Effects is always 0x01
-	hid_hw_raw_request(hid, 0x01, buf, sizeof(buf), report->type,
-				reqtype);
+	// //buf[0] = report->id;
+	// hid_output_report(report, buf);
+	
+	// hid_dbg(hid, "Sending report: ");
+	// for (size_t i = 0; i < sizeof(buf); i++) {
+	// 	hid_dbg(hid, "%02x", buf[i]);
+	// }
+	// hid_dbg(hid, "Report end\n");
+
+	// // ReportID for Effects is always 0x01
+	// hid_hw_raw_request(hid, 0x01, buf, sizeof(buf), report->type,
+	// 			reqtype);
 	hid_dbg(hid, "%s: request done", __func__);
-	kfree(buf);
 }
 
 static void pidff_set_signed(struct pidff_usage *usage, s16 value)
