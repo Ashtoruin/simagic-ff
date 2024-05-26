@@ -243,10 +243,8 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 		    struct hid_report *report, enum hid_class_request reqtype) 
 {
 	hid_dbg(hid, "%s", __func__);
-	hid_hw_request(hid, report, reqtype);
-	hid_dbg(hid, "%s: request done", __func__);
-
-	/*
+	
+	
 	__u8 *buf;
 
 	buf = hid_alloc_report_buf(report, GFP_KERNEL); // allocates +7 bytes
@@ -270,8 +268,8 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 	// ReportID for Effects is always 0x01
 	hid_hw_raw_request(hid, 0x01, buf, sizeof(buf), report->type,
 				reqtype);
-				
-	kfree(buf);*/
+	hid_dbg(hid, "%s: request done", __func__);
+	kfree(buf);
 }
 
 static void pidff_set_signed(struct pidff_usage *usage, s16 value)
