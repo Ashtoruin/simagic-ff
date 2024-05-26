@@ -243,7 +243,15 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 		    struct hid_report *report, enum hid_class_request reqtype) 
 {
 	hid_dbg(hid, "%s", __func__);
+	hid_dbg(hid, "%s: report->id: %d", __func__, report->id);
+	hid_dbg(hid, "%s: report_size: %d", __func__, report->field[0]->report_size);
+	hid_dbg(hid, "%s: value[0]: 0x%02x", __func__, report->field[0]->value[0]);
+	hid_dbg(hid, "%s: value[1]: 0x%02x", __func__, report->field[0]->value[1]);
+	hid_dbg(hid, "%s: value[2]: 0x%02x", __func__, report->field[0]->value[2]);
+
+
 	size_t i;
+	unsigned int old_rep_id = report->id;
 	s32 *value = report->field[0]->value;
 	for (i = report->field[0]->report_size-1; i > 0; i--) {
 		value[i] = value[i-1];
@@ -255,6 +263,8 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 	 	hid_dbg(hid, "%02x", value[i]);
 	}
 	hid_hw_request(hid, report, reqtype);
+
+	report->id = old_rep_id;
 	// __u8 *buf;
 
 	// buf = hid_alloc_report_buf(report, GFP_KERNEL); // allocates +7 bytes
