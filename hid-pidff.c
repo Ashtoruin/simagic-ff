@@ -249,14 +249,17 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 	
 	if (!buf)
 		return;
-	buf[0] = report->id;
+	buf[0] = 0x01;
+	buf[1] = report->id;
 	hid_output_report(report, buf+2);
 	
 	hid_dbg(hid, "Sending report: ");
-	printk(KERN_CONT "%02x", 0x01);
+	printk("%02x", 0x01);
 	for (size_t i = 0; i < sizeof(buf); i++) {
-		printk(KERN_CONT "%02x", buf[i]);
+		printk("%02x", buf[i]);
 	}
+	hid_dbg(hid, "Report end\n");
+
 	// ReportID for Effects is always 0x01
 	hid_hw_raw_request(hid, 0x01, buf, sizeof(buf), report->type,
 				reqtype);
