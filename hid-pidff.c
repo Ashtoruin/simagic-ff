@@ -17,7 +17,6 @@
 #include <linux/usb.h>
 
 #include <linux/hid.h>
-
 //#include "usbhid.h"
 
 #define	PID_EFFECTS_MAX		64
@@ -251,20 +250,22 @@ static void simagic_hid_hw_request_shifted(struct hid_device *hid,
 
 
 	size_t i;
-	unsigned int old_rep_id = report->id;
-	s32 *value = report->field[0]->value;
-	for (i = report->field[0]->report_size-1; i > 0; i--) {
+	struct hid_report * new_report;
+	new_report = kzalloc(sizeof(report), GFP_KERNEL);
+	memcpy(report, new_report, sizeof(report));
+	s32 *value = new_report->field[0]->value;
+	for (i = new_report->field[0]->report_size-1; i > 0; i--) {
 		value[i] = value[i-1];
 	}
-	value[0] = report->id;
-	report->id = 0x01;
+	value[0] = new_report->id;
+	new_report->id = 0x01;
 	hid_dbg(hid, "Sending report 0x01: ");
-	for (i = 0; i < report->field[0]->report_size; i++) {
+	for (i = 0; i < new_report->field[0]->report_size; i++) {
 	 	hid_dbg(hid, "%02x", value[i]);
 	}
-	hid_hw_request(hid, report, reqtype);
-
-	report->id = old_rep_id;
+	hid_hw_request(hid, new_report, reqtype);
+	
+	kfree(new_report);
 	// __u8 *buf;
 
 	// buf = hid_alloc_report_buf(report, GFP_KERNEL); // allocates +7 bytes
